@@ -17,9 +17,10 @@ has a working upload — their catalogues are hand-written TypeScript files.
 ### 1. Supabase
 
 Create a project, then in the SQL editor run the whole of
-`supabase/migrations/0001_init.sql`. It creates the tables, the triggers, the
-two storage buckets, and enables row-level security with no policies — see the
-long note at the bottom of that file for why that combination is deliberate.
+`supabase/migrations/20260919163433_init.sql`. It creates the tables, the
+triggers, the two storage buckets, and enables row-level security with no
+policies — see the long note at the bottom of that file for why that
+combination is deliberate.
 
 From **Project Settings → API**, take:
 
