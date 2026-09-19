@@ -11,49 +11,37 @@ import { preferredLocale } from "@/lib/i18n/negotiate";
 /**
  * Three jobs, in order.
  *
- * 1. **Language.** Every route lives under `/[lang]`, so a request for `/books`
- *    has to be sent to `/en/books` or `/bn/books`. Which one is decided from
+ * 1. **Language.** Every route lives under `/[lang]`, so a request for `/drive`
+ *    has to be sent to `/en/drive` or `/bn/drive`. Which one is decided from
  *    the browser's own `Accept-Language`, because a Bengali reader typing the
  *    bare domain should land in Bengali. This runs once, on the way in; from
  *    then on the language is in the URL and every link carries it, so no
  *    further redirects happen while browsing.
  *
- * 2. **The library gate.** Nothing on these shelves opens without the password
- *    printed in the sponsored copy. Two routes are outside it (the door and
- *    the register), and everything else, catalogue included, needs a session.
+ * 2. **The gate.** Nothing here opens without a session. Exactly one route is
+ *    outside it — the door itself — because a door behind a lock is a locked
+ *    building. There is no register: an address becomes an account by being
+ *    used, so there is nothing to sign up for.
  *
- * 3. **The admin guard.** This is the optimistic check the Next.js docs
- *    describe: it keeps everyone who typed the reader password out of the admin
- *    screens, and it costs nothing because the role is in a signed cookie that
- *    can be verified here without a data round trip. It is *not* the
- *    authorisation boundary: every Server Action calls `requireAdmin()`
- *    itself, because a POST never passes through a page.
+ * 3. **The admin guard.** The optimistic check the Next.js docs describe: it
+ *    keeps readers off the admin screens, and it costs nothing because the
+ *    role is in a signed cookie that can be verified here without a data round
+ *    trip. It is *not* the authorisation boundary. Every Server Action calls
+ *    `requireAdmin()` itself, because a POST never passes through a page.
  *
- * Note what this file cannot reach: anything under `/api` or with a file
- * extension is excluded by the matcher below, so the book files are not
- * protected from here. They are served by a route handler that checks the same
- * session itself: see `app/api/file/[slug]/route.ts`.
+ * Note what this file cannot reach. The matcher below excludes `/api` and
+ * anything with a file extension, so the file, thumbnail and download routes
+ * are not protected from here — each checks the same session itself, and for
+ * those paths that check is the only one there is.
  */
 
 /**
- * The pages that stay reachable without the password.
+ * The one page reachable without a session.
  *
- * `signin` has to be open or nobody could ever get in. `signup` is open
- * because it is the register rather than a gate: someone holding a copy
- * should be able to say where they are without first proving they have read
- * the page the password is printed on.
- *
- * `qr` is the proof sheet for the code printed in that copy, and it is open
- * for the same reason `signup` is: it has to work on the deployed site, since
- * that is the only place it can draw the code at the address the code will
- * actually carry, and requiring the admin password to see a picture of a
- * public URL was a gate in front of nothing. Everything the sheet renders is
- * either already public (the register's address) or typed by whoever asked for
- * it (`?base=`). It is `noindex` and linked from nowhere.
- *
- * Everything else in the site is behind the password, catalogue included.
+ * `signin` has to be open or nobody could ever get in. Everything else — the
+ * drive, the reader, a file, a thumbnail — is behind it.
  */
-const OPEN_ROUTES = new Set(["signin", "signup", "qr"]);
+const OPEN_ROUTES = new Set(["signin"]);
 
 export async function proxy(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
@@ -65,14 +53,14 @@ export async function proxy(request: NextRequest) {
     const target = request.nextUrl.clone();
     const chosen = preferredLocale(request.headers.get("accept-language"));
     target.pathname =
-      pathname === "/" ? `/${chosen}/signin` : `/${chosen}${pathname}`;
+      pathname === "/" ? `/${chosen}/drive` : `/${chosen}${pathname}`;
     return NextResponse.redirect(target);
   }
 
   const route = segments[1] ?? "";
   if (OPEN_ROUTES.has(route)) return NextResponse.next();
 
-  // --- 2. The library gate -----------------------------------------------
+  // --- 2. The gate -------------------------------------------------------
   const session = await readSessionToken(
     request.cookies.get(sessionCookieName)?.value,
   );
@@ -82,6 +70,9 @@ export async function proxy(request: NextRequest) {
 
   if (!session) {
     target.pathname = `/${lang}/signin`;
+    // Carried so the door returns someone to what they asked for. Read back
+    // in `signInAction`, where it is accepted only as a path on this origin —
+    // without that test this is an open redirect.
     target.searchParams.set("next", pathname + search);
     return NextResponse.redirect(target);
   }
@@ -90,7 +81,7 @@ export async function proxy(request: NextRequest) {
   if (route !== "admin") return NextResponse.next();
   if (canAdminister(session)) return NextResponse.next();
 
-  target.pathname = `/${lang}/books`;
+  target.pathname = `/${lang}/drive`;
   return NextResponse.redirect(target);
 }
 

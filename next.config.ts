@@ -17,15 +17,34 @@ import type { NextConfig } from "next";
 const isDev = process.env.NODE_ENV === "development";
 
 /**
- * There is no third-party allowlist. The door is a password rather than an
- * identity provider, the sponsor's artwork is served from this origin, and the
- * fonts are self-hosted by `next/font`, so every directive below is `'self'`
- * plus, where a browser API demands it, `data:` and `blob:`.
+ * The allowlist is one origin long, and it is worth saying why that one.
  *
- * That is worth stating rather than leaving as an absence: it is the whole
- * reason the About page can promise no third-party scripts and mean it, and any
- * future host added here breaks that promise.
+ * Reading a file needs nothing added: `/api/file/[id]` proxies the bytes, so
+ * from the browser's point of view every PDF is same-origin. That is a side
+ * benefit of proxying rather than its purpose, but it is a real one — a
+ * signed-URL read path would have had to open `connect-src` to Supabase for
+ * every visitor rather than only for the administrator uploading.
+ *
+ * What does need it is the upload: the browser PUTs bytes straight to Supabase
+ * Storage, because Vercel's free tier will not carry a 20MB request body. So
+ * the project origin is allowed, and nothing else is.
+ *
+ * Read at build time, which is when `next.config.ts` is evaluated. An unset
+ * variable is not fatal — everything but uploading still works — so this
+ * degrades to a self-only policy rather than throwing during a build that has
+ * no Supabase configured yet.
  */
+function supabaseOrigin(): string {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  if (!url) return "";
+  try {
+    return new URL(url).origin;
+  } catch {
+    return "";
+  }
+}
+
+const supabase = supabaseOrigin();
 
 const csp = [
   "default-src 'self'",
@@ -39,16 +58,20 @@ const csp = [
   "style-src 'self' 'unsafe-inline'",
   // Fonts are self-hosted by next/font, so no font CDN needs allowing.
   "font-src 'self'",
-  // data:/blob: cover PDF.js canvas rendering, the drawn cover art and the
-  // drawn Lanso D pack faces. No remote host: the sponsor's own logo and pack
-  // shot are in public/ precisely so this line can stay 'self'.
+  // data:/blob: cover pdf.js canvas rendering and the thumbnail canvas at
+  // upload time. No remote host: thumbnails are proxied through /api/thumb,
+  // so they are same-origin like everything else.
   "img-src 'self' data: blob:",
   // PDF.js runs its parser in a worker created from a blob URL.
   "worker-src 'self' blob:",
   "frame-src 'self'",
-  // Dev needs the HMR websocket; production talks only to its own origin.
-  `connect-src 'self'${isDev ? " ws: http://localhost:*" : ""}`,
+  // Supabase for the upload PUT; dev also needs the HMR websocket.
+  `connect-src 'self'${supabase ? ` ${supabase}` : ""}${
+    isDev ? " ws: http://localhost:*" : ""
+  }`,
   "media-src 'self'",
+  // Nothing is needed for WebGL: a shader is not script-src, and the three.js
+  // scenes create no workers and load no remote assets.
   "manifest-src 'self'",
   "upgrade-insecure-requests",
 ].join("; ");

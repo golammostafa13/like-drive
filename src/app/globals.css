@@ -1,0 +1,239 @@
+@import "tailwindcss";
+
+/* next-themes puts a class on <html>; wire it to Tailwind v4's dark variant. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ---------------------------------------------------------------
+   Design tokens (light)
+
+   A drive is a tool, not a magazine: it is looked at for a long
+   time, mostly to find one thing, and almost all of its surface is
+   other people's documents. So the chrome is quiet and nearly
+   colourless, and the one saturated colour in the set is reserved
+   for the thing you can act on.
+
+   The accent is an indigo-violet rather than the blue every file
+   manager already uses — far enough from the blue of a hyperlink
+   that a selected card is never mistaken for a link, and dark
+   enough on this ground to carry white text at 7.4:1.
+
+   `--accent-lit` is the colour that *emits* rather than fills: the
+   lights in the WebGL backdrop, the rim on a hovered card. A colour
+   dark enough for white text is by definition too dark to work as a
+   light source, which is why there are two rather than one at two
+   luminances.
+
+   Dark mode is a token swap only. No component overrides a colour
+   per theme, which is what lets the three.js scenes re-read these
+   with getComputedStyle and recolour themselves on a toggle.
+---------------------------------------------------------------- */
+:root {
+  --bg: #f6f6fb;
+  --bg-deep: #e7e7f2;
+  --surface: #fdfdff;
+  --surface-2: #ffffff;
+
+  /* Near-black with a trace of indigo, so the page does not read as grey
+     paper. 15.2:1 on --bg. */
+  --ink: #16161f;
+  --ink-mute: #56566a;   /* 7.1:1 — secondary copy */
+  --ink-faint: #8b8b9e;  /* 3.3:1 — decorative and icons only, never a label */
+  --line: #e0e0ea;
+  --line-soft: #ededf4;
+
+  --accent: #4f46c8;
+  --accent-hover: #3e37a8;
+  --accent-ink: #ffffff;
+  --accent-soft: #e6e4fa;
+
+  /* The light source. Do not darken it to match --accent: as a PointLight,
+     --accent barely registers, and the backdrop goes flat. */
+  --accent-lit: #a78bfa;
+
+  /* The wordmark gradient, and the three lights in the backdrop scene. */
+  --brand-1: #6366f1;
+  --brand-2: #8b5cf6;
+  --brand-3: #22d3ee;
+
+  --ok: #0f7a52;
+  --ok-soft: #d6f2e5;
+  --warn: #8a5a00;
+  --warn-soft: #fbeecd;
+  --danger: #b3261e;
+  --danger-soft: #fbdedc;
+
+  --radius: 0.75rem;
+  --elev-card: 0 1px 2px rgb(22 22 31 / 0.05), 0 8px 24px rgb(22 22 31 / 0.05);
+
+  /* Two elevations and one glow, and the glow is the point.
+     A primary button separated from the page by a grey shadow reads as a
+     sticker; separated by a shadow tinted with its own colour, it reads as
+     lit. `color-mix` keeps that tint tied to --accent, so re-theming the
+     drive never leaves a violet halo under a green button. */
+  --elev-1: 0 1px 2px rgb(22 22 31 / 0.06), 0 4px 12px rgb(22 22 31 / 0.06);
+  --elev-2: 0 2px 4px rgb(22 22 31 / 0.07), 0 12px 32px rgb(22 22 31 / 0.10);
+  --glow: 0 2px 8px color-mix(in oklab, var(--accent) 30%, transparent);
+  --glow-lg: 0 6px 20px color-mix(in oklab, var(--accent) 38%, transparent);
+}
+
+:root.dark {
+  /* Not inverted: a different room. The ground is an indigo so dark it reads
+     as black, and the accent brightens rather than dims, because on a dark
+     ground the act has to emit. */
+  --bg: #0b0b12;
+  --bg-deep: #05050a;
+  --surface: #14141f;
+  --surface-2: #1b1b28;
+
+  --ink: #ecebf5;
+  --ink-mute: #a3a2b8;
+  --ink-faint: #6e6d85;
+  --line: #292938;
+  --line-soft: #1f1f2c;
+
+  --accent: #a394f8;
+  --accent-hover: #bdb2fb;
+  --accent-ink: #14141f;
+  --accent-soft: #241f45;
+
+  --accent-lit: #c4b5fd;
+
+  --brand-1: #818cf8;
+  --brand-2: #a78bfa;
+  --brand-3: #67e8f9;
+
+  --ok: #4ade80;
+  --ok-soft: #10281d;
+  --warn: #fbbf24;
+  --warn-soft: #2a1f06;
+  --danger: #fca5a5;
+  --danger-soft: #2c1214;
+
+  --elev-card: 0 1px 2px rgb(0 0 0 / 0.4), 0 8px 24px rgb(0 0 0 / 0.35);
+  --elev-1: 0 1px 2px rgb(0 0 0 / 0.5), 0 4px 12px rgb(0 0 0 / 0.4);
+  --elev-2: 0 2px 4px rgb(0 0 0 / 0.5), 0 12px 32px rgb(0 0 0 / 0.45);
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-bg-deep: var(--bg-deep);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-ink: var(--ink);
+  --color-ink-mute: var(--ink-mute);
+  --color-ink-faint: var(--ink-faint);
+  --color-line: var(--line);
+  --color-line-soft: var(--line-soft);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-ink: var(--accent-ink);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-lit: var(--accent-lit);
+  --color-ok: var(--ok);
+  --color-ok-soft: var(--ok-soft);
+  --color-warn: var(--warn);
+  --color-warn-soft: var(--warn-soft);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --radius-card: var(--radius);
+  /* Utility names on the left, raw tokens on the right. The two sets are
+     deliberately named differently: `--shadow-x: var(--shadow-x)` inside
+     `@theme inline` is a self-reference, and which definition wins is not
+     something worth finding out on a deploy. */
+  --shadow-card: var(--elev-card);
+  --shadow-e1: var(--elev-1);
+  --shadow-e2: var(--elev-2);
+  --shadow-glow: var(--glow);
+  --shadow-glow-lg: var(--glow-lg);
+}
+
+* {
+  border-color: var(--line);
+}
+
+html {
+  /* The reader owns the window scroller and does its own virtualisation maths
+     against it, so nothing here may smooth-scroll globally. Lenis is attached
+     per page instead, and never on /read. */
+  scroll-behavior: auto;
+}
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/*
+  Bengali needs a taller line box and a different stack. Applied by
+  `textClass()` rather than by a :lang() selector, so a component knows at
+  render time whether it is setting Bengali and can pick its own spacing too.
+*/
+.bn {
+  font-family: "Noto Sans Bengali", "Hind Siliguri", system-ui, sans-serif;
+  line-height: 1.85;
+  letter-spacing: 0;
+}
+
+/*
+  The WebGL backdrop sits behind everything and is never interactive. Fixed
+  rather than absolute so it does not scroll, and painted at -z-10 so every
+  surface above it keeps its own background.
+*/
+.backdrop-canvas {
+  position: fixed;
+  inset: 0;
+  z-index: -10;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  display: block;
+}
+
+/*
+  The still image the backdrop falls back to: on reduced motion, on a device
+  with no WebGL, and underneath the canvas while it draws its first frame. It
+  is the same three brand colours the scene lights with, so the transition
+  from one to the other is not a colour change.
+*/
+.backdrop-still {
+  position: fixed;
+  inset: 0;
+  z-index: -10;
+  pointer-events: none;
+  background:
+    radial-gradient(60rem 40rem at 18% 0%, color-mix(in oklab, var(--brand-1) 22%, transparent), transparent 70%),
+    radial-gradient(50rem 36rem at 88% 12%, color-mix(in oklab, var(--brand-2) 18%, transparent), transparent 68%),
+    radial-gradient(44rem 30rem at 55% 100%, color-mix(in oklab, var(--brand-3) 14%, transparent), transparent 72%);
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--elev-card);
+}
+
+/* The focus ring is one rule, everywhere, and it is never removed. */
+:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/*
+  Every animation in the project stops here, including the WebGL scenes —
+  those check the same query in JavaScript and never mount a renderer, because
+  a paused canvas still costs a GPU context. This rule covers the CSS half.
+*/
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

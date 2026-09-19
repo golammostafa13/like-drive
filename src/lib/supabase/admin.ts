@@ -68,8 +68,50 @@ export function supabaseAdmin(): SupabaseClient {
  * up" is a far better page than a stack trace.
  */
 export function looksPaused(error: unknown): boolean {
-  const message = error instanceof Error ? error.message : String(error ?? "");
-  return /fetch failed|ENOTFOUND|ECONNREFUSED|socket hang up|timeout/i.test(
-    message,
+  return /fetch failed|ENOTFOUND|EAI_AGAIN|ECONNREFUSED|ECONNRESET|socket hang up|network|timeout/i.test(
+    describe(error),
   );
+}
+
+/**
+ * Every string an error of any shape might be hiding the cause in.
+ *
+ * supabase-js does **not** throw `Error` instances. A failed query hands back
+ * a plain object — `{ message, details, hint, code }` — which the data layer
+ * rethrows as-is, so `String(error)` on it is `"[object Object]"` and any
+ * check that relied on that silently matched nothing.
+ *
+ * That is not a hypothetical: it is how the first version of `looksPaused`
+ * failed. It was written for `Error`, met a Postgrest-shaped object, and
+ * turned the carefully-worded "the library is waking up" page into a 500 —
+ * the exact failure it existed to prevent, in the exact circumstance it was
+ * written for. Hence: gather every candidate string and test the lot.
+ *
+ * The transport-level cause is usually in `details` rather than `message`, and
+ * the `cause` chain is where Node puts `ENOTFOUND`, so both are walked.
+ */
+function describe(error: unknown): string {
+  const parts: string[] = [];
+  let current: unknown = error;
+
+  for (let depth = 0; current && depth < 5; depth++) {
+    if (typeof current === "string") {
+      parts.push(current);
+      break;
+    }
+    if (typeof current !== "object") break;
+
+    const shape = current as {
+      message?: unknown;
+      details?: unknown;
+      code?: unknown;
+      cause?: unknown;
+    };
+    for (const field of [shape.message, shape.details, shape.code]) {
+      if (typeof field === "string") parts.push(field);
+    }
+    current = shape.cause;
+  }
+
+  return parts.join(" ");
 }
