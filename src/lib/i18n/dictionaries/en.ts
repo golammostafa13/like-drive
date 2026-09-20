@@ -126,6 +126,14 @@ export const en = {
     metaTitle: "Read {title}",
   },
 
+  qr: {
+    title: "QR code",
+    action: "QR code",
+    hint: "Scan this to open the document on another device.",
+    alt: "QR code that opens {title}",
+    download: "Download PNG",
+  },
+
   notFound: {
     code: "404",
     title: "There is nothing at this address.",

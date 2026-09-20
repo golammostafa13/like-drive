@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Download, MoreVertical, Pencil, Trash2 } from "lucide-react";
+import { Download, MoreVertical, Pencil, QrCode, Trash2 } from "lucide-react";
+import { QrDialog } from "@/components/qr-dialog";
 import { deleteAction, renameAction } from "@/lib/actions/drive";
 import type { Dictionary } from "@/lib/i18n";
 import type { Locale } from "@/lib/i18n/config";
@@ -40,6 +41,7 @@ export function RowActions({
 }) {
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
+  const [showQr, setShowQr] = useState(false);
 
   function rename() {
     const next = window.prompt(dict.drive.renameTo, name);
@@ -99,6 +101,20 @@ export function RowActions({
             </a>
           )}
 
+          {kind === "file" && (
+            <button
+              type="button"
+              onClick={() => setShowQr(true)}
+              className={cn(
+                "flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left hover:bg-accent-soft hover:text-accent",
+                textClass(lang),
+              )}
+            >
+              <QrCode className="size-4" aria-hidden="true" />
+              {dict.qr.action}
+            </button>
+          )}
+
           <button
             type="button"
             onClick={rename}
@@ -132,6 +148,16 @@ export function RowActions({
           )}
         </div>
       </details>
+
+      {showQr && (
+        <QrDialog
+          fileId={id}
+          fileName={name}
+          onClose={() => setShowQr(false)}
+          dict={dict}
+          lang={lang}
+        />
+      )}
     </div>
   );
 }

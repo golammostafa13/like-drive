@@ -17,10 +17,12 @@ import {
   Loader2,
   Maximize2,
   Moon,
+  QrCode,
   Sun,
   ZoomIn,
   ZoomOut,
 } from "lucide-react";
+import { QrDialog } from "@/components/qr-dialog";
 import { getDictionary } from "@/lib/i18n";
 import type { Locale } from "@/lib/i18n/config";
 import { formatBytes, formatNumberIn, textClass } from "@/lib/i18n/content";
@@ -126,6 +128,7 @@ export function PdfReader({
   const [scale, setScale] = useState<number | null>(null);
   const [frameWidth, setFrameWidth] = useState(0);
   const [sepia, setSepia] = useState(false);
+  const [qrOpen, setQrOpen] = useState(false);
 
   const [page, setPage] = useState(1);
   const [mounted, setMounted] = useState({ first: 1, last: 1 });
@@ -508,6 +511,12 @@ export function PdfReader({
             >
               {sepia ? <Sun className="size-[18px]" /> : <Moon className="size-[18px]" />}
             </ToolButton>
+            <ToolButton
+              onClick={() => setQrOpen(true)}
+              label={dict.qr.title}
+            >
+              <QrCode className="size-[18px]" />
+            </ToolButton>
             <a
               /* The gated redirect, not the streaming route: a download is
                  the whole file however it is served, so it is handed to a
@@ -641,6 +650,16 @@ export function PdfReader({
           </button>
         </div>
       </footer>
+
+      {qrOpen && (
+        <QrDialog
+          fileId={file.id}
+          fileName={file.name}
+          onClose={() => setQrOpen(false)}
+          dict={dict}
+          lang={lang}
+        />
+      )}
     </div>
   );
 }

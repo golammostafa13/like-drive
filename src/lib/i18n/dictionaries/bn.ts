@@ -123,6 +123,14 @@ export const bn: Dictionary = {
     metaTitle: "{title} পড়ুন",
   },
 
+  qr: {
+    title: "কিউআর কোড",
+    action: "কিউআর কোড",
+    hint: "অন্য ডিভাইসে নথিটি খুলতে এটি স্ক্যান করুন।",
+    alt: "{title} খোলার কিউআর কোড",
+    download: "পিএনজি ডাউনলোড",
+  },
+
   notFound: {
     code: "৪০৪",
     title: "এই ঠিকানায় কিছু নেই।",

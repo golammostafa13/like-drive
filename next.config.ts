@@ -73,7 +73,14 @@ const csp = [
   // Nothing is needed for WebGL: a shader is not script-src, and the three.js
   // scenes create no workers and load no remote assets.
   "manifest-src 'self'",
-  "upgrade-insecure-requests",
+  // Production only. Over plain HTTP this rewrites every subresource request
+  // to https://, which the dev server does not speak — the stylesheet then
+  // fails and the page renders as unstyled HTML. Browsers exempt `localhost`
+  // and `127.0.0.1` from the upgrade, so the breakage appears only when dev is
+  // reached by any other name: the LAN address Next also prints, a container
+  // IP, a tunnel. There is nothing to upgrade to in dev, so the directive buys
+  // nothing there in exchange for that.
+  ...(isDev ? [] : ["upgrade-insecure-requests"]),
 ].join("; ");
 
 const securityHeaders = [
