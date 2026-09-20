@@ -45,8 +45,6 @@ export const en = {
 
   auth: {
     title: "Sign in",
-    intro:
-      "Type your email address and the password you were given. Any address works — it simply becomes your account.",
     emailLabel: "Email address",
     emailPlaceholder: "you@example.com",
     passwordLabel: "Password",

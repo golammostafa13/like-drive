@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <!-- The drive's mark: one cut crystal, five facets.
+       Fixed hex rather than CSS variables, because a favicon is rendered by
+       the browser chrome where this document's custom properties do not
+       exist. The values are the light theme's brand tokens. -->
+  <defs>
+    <linearGradient id="a" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#a5b4fc"/><stop offset="1" stop-color="#6366f1"/>
+    </linearGradient>
+    <linearGradient id="b" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#e0e7ff"/><stop offset="1" stop-color="#8b5cf6"/>
+    </linearGradient>
+    <linearGradient id="c" x1="1" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#67e8f9"/><stop offset="1" stop-color="#22d3ee"/>
+    </linearGradient>
+    <linearGradient id="d" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#6366f1"/><stop offset="1" stop-color="#312e81"/>
+    </linearGradient>
+    <linearGradient id="e" x1="1" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#22d3ee"/><stop offset="1" stop-color="#4f46e5"/>
+    </linearGradient>
+  </defs>
+  <!-- crown: three facets above the girdle -->
+  <path d="M4 13 L10.5 4 L16 13 Z" fill="url(#a)"/>
+  <path d="M10.5 4 L21.5 4 L16 13 Z" fill="url(#b)"/>
+  <path d="M21.5 4 L28 13 L16 13 Z" fill="url(#c)"/>
+  <!-- pavilion: two facets tapering to the point -->
+  <path d="M4 13 L16 13 L16 29 Z" fill="url(#d)"/>
+  <path d="M16 13 L28 13 L16 29 Z" fill="url(#e)"/>
+  <!-- the girdle, catching the light -->
+  <path d="M4 13 H28" stroke="#ffffff" stroke-opacity=".55" stroke-width="1"/>
+</svg>

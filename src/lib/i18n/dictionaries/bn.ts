@@ -44,8 +44,6 @@ export const bn: Dictionary = {
 
   auth: {
     title: "সাইন ইন",
-    intro:
-      "আপনার ইমেইল ঠিকানা এবং আপনাকে দেওয়া পাসওয়ার্ডটি লিখুন। যেকোনো ঠিকানা চলবে — সেটিই আপনার অ্যাকাউন্ট হয়ে যাবে।",
     emailLabel: "ইমেইল ঠিকানা",
     emailPlaceholder: "you@example.com",
     passwordLabel: "পাসওয়ার্ড",

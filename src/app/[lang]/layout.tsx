@@ -99,6 +99,14 @@ export default async function LangLayout(props: LayoutProps<"/[lang]">) {
   return (
     <html lang={lang} suppressHydrationWarning>
       <head>
+        {/* A raw `<script>`, deliberately, and not `next/script`.
+            `beforeInteractive` does not emit an executable tag: it pushes the
+            source into `self.__next_s` for Next's runtime to inject once its
+            own async chunk has loaded, which is after first paint — the exact
+            flash this exists to prevent. React warns in development that it
+            will not execute this tag on a client render, which is true and
+            harmless: it runs while the server-rendered HTML is parsed, which
+            is the only moment that matters here. */}
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
       <body

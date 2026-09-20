@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { BrandMark3D } from "@/components/brand-mark-3d";
 import { DoorForm } from "@/components/auth/door-form";
 import { getDictionaryFor } from "@/lib/i18n";
 import { hasLocale, otherLocale, switchLocalePath } from "@/lib/i18n/config";
@@ -36,6 +37,11 @@ export default async function SignInPage(props: PageProps<"/[lang]/signin">) {
     <main className="flex min-h-dvh items-center justify-center px-4 py-12">
       <div className="w-full max-w-md">
         <div className="mb-8 text-center">
+          {/* The mark at the size it was drawn for. The backdrop gathers its
+              crystals in behind this screen (see `Backdrop`), so the logo is
+              the near element of one composition rather than an ornament
+              sitting on top of an unrelated one. */}
+          <BrandMark3D className="mx-auto mb-4 size-14" />
           <h1
             className={cn(
               "bg-gradient-to-r from-[var(--brand-1)] via-[var(--brand-2)] to-[var(--brand-3)] bg-clip-text text-4xl font-semibold tracking-tight text-transparent",
@@ -50,10 +56,6 @@ export default async function SignInPage(props: PageProps<"/[lang]/signin">) {
         </div>
 
         <div className="card p-6 sm:p-8">
-          <p className={cn("mb-6 text-sm text-ink-mute", textClass(lang))}>
-            {dict.auth.intro}
-          </p>
-
           <DoorForm
             dict={dict}
             lang={lang}

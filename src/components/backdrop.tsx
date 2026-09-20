@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { useTheme } from "@/components/theme-provider";
-import type { SceneHandle } from "@/lib/scenes/harness";
+import type { BackdropHandle } from "@/lib/scenes/backdrop-scene";
 
 /**
  * Mounts the WebGL backdrop, and knows when not to.
@@ -32,14 +32,16 @@ import type { SceneHandle } from "@/lib/scenes/harness";
  */
 export function Backdrop() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const sceneRef = useRef<SceneHandle | null>(null);
+  const sceneRef = useRef<BackdropHandle | null>(null);
   const [ready, setReady] = useState(false);
 
   const pathname = usePathname();
   const { resolvedTheme } = useTheme();
 
   // `/en/read/<id>` → the second segment is the route.
-  const inReader = pathname.split("/").filter(Boolean)[1] === "read";
+  const route = pathname.split("/").filter(Boolean)[1];
+  const inReader = route === "read";
+  const onSignin = route === "signin";
 
   useEffect(() => {
     if (inReader) return;
@@ -74,14 +76,42 @@ export function Backdrop() {
     };
   }, [inReader]);
 
-  // A theme change is three colour assignments, not a rebuild — which is the
-  // whole reason the scene reads its palette from CSS custom properties.
+  // A theme change is a handful of colour assignments and one environment
+  // rebuild, not a scene rebuild — which is the whole reason the scene reads
+  // its palette from CSS custom properties.
   useEffect(() => {
     sceneRef.current?.refreshTheme();
   }, [resolvedTheme]);
 
+  /**
+   * The sign-in screen gets a composition; everywhere else gets a backdrop.
+   *
+   * Eased inside the scene rather than rebuilt here, so crossing the door is a
+   * continuous movement of the same crystals rather than one arrangement
+   * cutting to another — which is the difference between a transition and a
+   * flicker. `ready` is a dependency because the scene does not exist to be
+   * told anything until the first frame has landed.
+   */
+  useEffect(() => {
+    sceneRef.current?.setMood(onSignin ? "signin" : "app");
+  }, [onSignin, ready]);
+
   return (
-    <div aria-hidden="true">
+    /*
+     * The wrapper carries the viewport box, and that is load-bearing rather
+     * than tidiness. Both children are `position: fixed`, so with a plain
+     * `<div>` this element had zero height — which meant the scene's
+     * `resize()` saw `clientHeight === 0`, returned early, and left the
+     * renderer at its default 300×150 buffer for CSS to stretch across the
+     * screen. The backdrop was being drawn at a quarter of the resolution it
+     * was displayed at. The same empty box made the loop's
+     * `IntersectionObserver` unreliable, so the first frame sometimes never
+     * arrived and the canvas stayed faded out.
+     */
+    <div
+      aria-hidden="true"
+      className="pointer-events-none fixed inset-0 -z-10"
+    >
       <div className="backdrop-still" />
       {!inReader && (
         <canvas

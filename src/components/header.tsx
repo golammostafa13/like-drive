@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { HardDrive } from "lucide-react";
+import { BrandMark3D } from "@/components/brand-mark-3d";
 import { SignOutButton } from "@/components/auth/sign-out-button";
 import { ThemeToggle } from "@/components/theme-toggle";
 import type { Dictionary } from "@/lib/i18n";
@@ -34,7 +34,7 @@ export function Header({ dict, lang }: { dict: Dictionary; lang: Locale }) {
           href={localePath(lang, "/drive")}
           className="flex items-center gap-2 font-semibold"
         >
-          <HardDrive className="size-5 text-accent" aria-hidden="true" />
+          <BrandMark3D className="size-6" />
           <span
             className={cn(
               "bg-gradient-to-r from-[var(--brand-1)] via-[var(--brand-2)] to-[var(--brand-3)] bg-clip-text text-transparent",
